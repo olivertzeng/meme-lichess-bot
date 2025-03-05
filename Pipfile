@@ -4,10 +4,10 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-chess = "~=1.11"
 pyyaml = "~=6.0"
-requests = "~=2.32"
 backoff = "~=2.2"
+chess = "~=1.11"
+requests = "~=2.32"
 rich = "~=13.9"
 
 [dev-packages]

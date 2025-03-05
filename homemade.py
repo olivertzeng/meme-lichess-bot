@@ -3,94 +3,81 @@ Some example classes for people who want to create a homemade bot.
 
 With these classes, bot makers will not have to implement the UCI or XBoard interfaces themselves.
 """
-import chess
-from chess.engine import PlayResult, Limit
-import random
-from lib.engine_wrapper import MinimalEngine
-from lib.lichess_types import MOVE, HOMEMADE_ARGS_TYPE
+
 import logging
+import random
 
+import chess
+from chess.engine import Limit, PlayResult
 
-# Use this logger variable to print messages to the console or log files.
-# logger.info("message") will always print "message" to the console or log file.
-# logger.debug("message") will only print "message" if verbose logging is enabled.
+from lib.engine_wrapper import MinimalEngine
+from lib.lichess_types import HOMEMADE_ARGS_TYPE
+
 logger = logging.getLogger(__name__)
+stockfishPath = "stockfish"
 
 
-class ExampleEngine(MinimalEngine):
-    """An example engine that all homemade engines inherit."""
+class Anarchy(MinimalEngine):
 
+    def search(
+        self, board: chess.Board, time_limit: Limit, *args: HOMEMADE_ARGS_TYPE
+    ) -> PlayResult:
 
-# Bot names and ideas from tom7's excellent eloWorld video
+        # Get amount of legal moves
+        legalMoves = list(board.legal_moves)
 
-class RandomMove(ExampleEngine):
-    """Get a random move."""
+        # Initialise variables
+        bestEvaluation = None
+        bestMove = None
 
-    def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:  # noqa: ARG002
-        """Choose a random move."""
-        return PlayResult(random.choice(list(board.legal_moves)), None)
+        # Evaluate each move
+        for move in legalMoves:
 
+            # en passant is forced
+            if board.is_en_passant(move):
+                print("en passant is forced")
+                return PlayResult(move, None)
 
-class Alphabetical(ExampleEngine):
-    """Get the first move when sorted by san representation."""
+            # play the ruy lopez
+            if board.board_fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":
+                print("e4 best by test")
+                return "e2e4"
 
-    def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:  # noqa: ARG002
-        """Choose the first move alphabetically."""
-        moves = list(board.legal_moves)
-        moves.sort(key=board.san)
-        return PlayResult(moves[0], None)
+            if board.board_fen() == "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR":
+                return "g1f3"
 
+            if (
+                board.board_fen()
+                == "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R"
+            ):
+                return PlayResult("f1b5", None)
 
-class FirstMove(ExampleEngine):
-    """Get the first move when sorted by uci representation."""
+            # always play the bongcloud
+            if (
+                board.san(move) == "Ke2"
+                or board.san(move) == "Ke7"
+                or board.san(move) == "Kxe2"
+                or board.san(move) == "Kxe7"
+            ):
+                return PlayResult(move, None)
 
-    def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:  # noqa: ARG002
-        """Choose the first move alphabetically in uci representation."""
-        moves = list(board.legal_moves)
-        moves.sort(key=str)
-        return PlayResult(moves[0], None)
+            # never play rook a4
+            if not (board.san(move)[0] == "R" and board.san(move)[-2:] == "a4"):
+                # king stays on e2/e7
+                if not (board.san(move)[0] == "K"):
+                    # play move
+                    board.push(move)
+                    # evaluate position
+                    evaluation = self.evaluate(board, searchTime)
+                    # if the evaluation is better than the current position use it as the new best move
+                    if bestEvaluation is None or bestEvaluation > evaluation:
+                        bestEvaluation = evaluation
+                        bestMove = move
+                    board.pop()
+            else:
+                print("I saw Ra4, I just didn't like it")
 
-
-class ComboEngine(ExampleEngine):
-    """
-    Get a move using multiple different methods.
-
-    This engine demonstrates how one can use `time_limit`, `draw_offered`, and `root_moves`.
-    """
-
-    def search(self,
-               board: chess.Board,
-               time_limit: Limit,
-               ponder: bool,  # noqa: ARG002
-               draw_offered: bool,
-               root_moves: MOVE) -> PlayResult:
-        """
-        Choose a move using multiple different methods.
-
-        :param board: The current position.
-        :param time_limit: Conditions for how long the engine can search (e.g. we have 10 seconds and search up to depth 10).
-        :param ponder: Whether the engine can ponder after playing a move.
-        :param draw_offered: Whether the bot was offered a draw.
-        :param root_moves: If it is a list, the engine should only play a move that is in `root_moves`.
-        :return: The move to play.
-        """
-        if isinstance(time_limit.time, int):
-            my_time = time_limit.time
-            my_inc = 0
-        elif board.turn == chess.WHITE:
-            my_time = time_limit.white_clock if isinstance(time_limit.white_clock, int) else 0
-            my_inc = time_limit.white_inc if isinstance(time_limit.white_inc, int) else 0
+        if bestMove != None:
+            return PlayResult(bestMove, None)
         else:
-            my_time = time_limit.black_clock if isinstance(time_limit.black_clock, int) else 0
-            my_inc = time_limit.black_inc if isinstance(time_limit.black_inc, int) else 0
-
-        possible_moves = root_moves if isinstance(root_moves, list) else list(board.legal_moves)
-
-        if my_time / 60 + my_inc > 10:
-            # Choose a random move.
-            move = random.choice(possible_moves)
-        else:
-            # Choose the first move alphabetically in uci representation.
-            possible_moves.sort(key=str)
-            move = possible_moves[0]
-        return PlayResult(move, None, draw_offered=draw_offered)
+            return PlayResult(random.choice(list(board.legal_moves)), None)
