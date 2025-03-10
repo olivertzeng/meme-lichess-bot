@@ -1,4 +1,4 @@
-token: "BRUH"    # Lichess OAuth2 Token.
+token: "LOL YOU THOUGHT"    # Lichess OAuth2 Token.
 url: "https://lichess.org/"        # Lichess base URL.
 
 engine:                            # Engine settings.
@@ -176,10 +176,10 @@ greeting:
   #   {opponent} to insert opponent's name
   #   {me} to insert bot's name
   # Any other words in curly braces will be removed.
-  hello: "早上好中國現在我有 Bing Chiling" # Message to send to opponent chat at the start of a game
-  goodbye: "Good game!" # Message to send to opponent chat at the end of a game
-  hello_spectators: "Hi! I'm {me}. Type !help for a list of commands I can respond to." # Message to send to spectator chat at the start of a game
-  goodbye_spectators: "Thanks for watching!" # Message to send to spectator chat at the end of a game
+  hello: "Wadadogdoin" # Message to send to opponent chat at the start of a game
+  goodbye: "It's a beautiful day outside. Birds are singing, flowers are blooming. On days like these, kids like you, SHOULD BE BURNING IN HELL." # Message to send to opponent chat at the end of a game
+  hello_spectators: "Welcome to the secret FBI message lounge! Please type !help for a list of usefull commands lmao" # Message to send to spectator chat at the start of a game
+  goodbye_spectators: "ZA WARUDO! It's time to stop watching this game!" # Message to send to spectator chat at the end of a game
 
 # pgn_directory: "game_records"    # A directory where PGN-format records of the bot's games are kept
 # pgn_file_grouping: "game"        # How to group games into files. Options are "game", "opponent", and "all"
@@ -188,7 +188,7 @@ greeting:
                                    # "all" - every game is written to a single file named "{Bot name} games.pgn"
 
 matchmaking:
-  allow_matchmaking: false         # Set it to 'true' to challenge other bots.
+  allow_matchmaking: true          # Set it to 'true' to challenge other bots.
   allow_during_games: false        # Set it to 'true' to create challenges during long games.
   challenge_variant: "random"      # If set to 'random', the bot will choose one variant from the variants enabled in 'challenge.variants'.
   challenge_timeout: 30            # Create a challenge after being idle for 'challenge_timeout' minutes. The minimum is 1 minute.
